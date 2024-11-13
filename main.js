@@ -9,7 +9,7 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-  console.log('aquii');
+  console.log('aqui');
   win.loadFile('index.html');
 }
 
