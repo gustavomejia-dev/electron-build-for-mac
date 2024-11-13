@@ -25,7 +25,11 @@ jobs:
 
     - name: Build the Electron App
       run: npm run mac
-
+    - name: Publish
+      run: |
+        npm run dist
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     # Opcional: Salvar como Artefato para download direto do GitHub Actions
     - name: Upload Electron Installer as Artifact
       uses: actions/upload-artifact@v3
