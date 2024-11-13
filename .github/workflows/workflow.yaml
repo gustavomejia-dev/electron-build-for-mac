@@ -32,8 +32,23 @@ jobs:
     - name: Package with Electron Builder
       run: npx electron-builder --mac --win --linux
 
-    - name: Upload Electron Installer as Artifact
+    # Upload macOS installer as artifact
+    - name: Upload macOS Installer
       uses: actions/upload-artifact@v3
       with:
-        name: electron-installer
-        path: dist/
+        name: macOS-installer
+        path: dist/*.dmg
+
+    # Upload Windows installer as artifact
+    - name: Upload Windows Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: windows-installer
+        path: dist/*.exe
+
+    # Upload Linux installer as artifact
+    - name: Upload Linux Installer
+      uses: actions/upload-artifact@v3
+      with:
+        name: linux-installer
+        path: dist/*.AppImage
