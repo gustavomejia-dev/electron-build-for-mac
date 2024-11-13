@@ -1,76 +1,56 @@
-name: Build Electron App for macOS
+name: Build Electron App
 
 on:
   push:
     branches:
-      - main  # Quando um push é feito na branch main
-      - master
-      - mac
+      - main  # Executa o workflow ao fazer push na branch principal
   pull_request:
-    branches:
-      - main  # Quando uma pull request é aberta para a branch main
-      - master
-      - mac
 
 jobs:
   build:
-    runs-on: macos-latest  # O job será executado em um ambiente macOS
+    runs-on: ubuntu-latest
 
     steps:
-      # 1. Checar o repositório
-      - name: Check out repository
-        uses: actions/checkout@v3
+    - name: Check out the repository
+      uses: actions/checkout@v3
 
-      # 2. Configurar Git LFS
-      - name: Set up Git LFS
-        run: |
-          git lfs install  # Inicializa o Git LFS
-          git lfs track "dist/*.dmg"  # Rastreia arquivos grandes (ex: arquivos .dmg)
-          git add .gitattributes  # Adiciona o arquivo .gitattributes com a configuração do LFS
-          git commit -m "Adicionando configuração do Git LFS" || echo "Nada para commit"
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18' # Altere para a versão que está usando
 
-      # 3. Instalar dependências do Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'  # Define a versão do Node.js a ser usada
+    - name: Install dependencies
+      run: npm install
 
-      # 4. Instalar dependências do projeto
-      - name: Install dependencies
-        run: npm install --force  # Instala as dependências do projeto
+    - name: Build the Electron App
+      run: npm run build # Altere para o comando que usa para build
 
-      # 5. Instalar o dmg-license (necessário para a licença .dmg)
-      #- name: Install dmg-license
-       # run: npm install --force -g dmg-license  # Instala o dmg-license globalmente
+    - name: Package with Electron Builder
+      run: npx electron-builder --linux --win --mac  # Ajuste as opções conforme necessário
 
-      # 6. Configurar e construir a aplicação Electron
-      - name: Build the Electron app
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}  # Secret com o link para o certificado de assinatura
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}  # Secret com a senha do certificado
-        run: |
-          npm run mac # Comando para gerar o build (supondo que já esteja configurado no package.json)
+    # Opção 1: Salvar como Artefato (disponível para download na aba de artefatos da execução)
+    - name: Upload Electron Installer as Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: electron-installer
+        path: dist/ # Coloque o caminho correto da pasta onde o instalador é salvo
 
-          # Aqui você vai adicionar a licença ao arquivo .dmg
-          dmg-license --dmg dist/*.dmg --license-file LICENSE.txt  # Onde LICENSE.txt é o seu arquivo de licença
+    # Opção 2: Criar uma Release e anexar o Instalador (para download direto na página de releases)
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      with:
+        tag_name: 'v1.0.0'  # Atualize o número da versão dinamicamente se desejar
+        release_name: 'Release v1.0.0'
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 7. Compactar a saída do build
-      - name: Compress the build output
-        run: |
-          #tar -czf electron.tar.gz -C dist/  # Compacta a pasta dist em um arquivo .tar.gz
-          # Caso prefira zip:
-          # zip -r electron.zip dist/
-
-      # 8. Fazer upload do arquivo compactado como Artifact
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v3
-        #with:
-          #name: mac-build  # Nome do artifact
-          #path: electron.tar.gz  # Caminho do arquivo compactado
-
-      # 9. Commit e push (caso haja novos arquivos LFS)
-      - name: Push to GitHub (if there are new LFS files)
-        run: |
-          git add dist/*.dmg  # Adiciona arquivos .dmg ao Git
-          git commit -m "Adicionando build compactado"  # Cria um commit com o build
-          git push origin master  # Envia o commit para a branch main
+    - name: Upload Installer to Release
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist/installer-name.exe  # Caminho do instalador específico
+        asset_name: installer-name.exe       # Nome do arquivo de instalador
+        asset_content_type: application/octet-stream
