@@ -5,10 +5,12 @@ on:
     branches:
       - main  # Quando um push é feito na branch main
       - master
+      - mac
   pull_request:
     branches:
       - main  # Quando uma pull request é aberta para a branch main
       - master
+      - mac
 
 jobs:
   build:
