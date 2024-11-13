@@ -3,12 +3,14 @@ name: Build Electron App
 on:
   push:
     branches:
-      - main  # Executa o workflow ao fazer push na branch principal
+      - main 
+      - mac
+      - master # Executa o workflow ao fazer push na branch principal
   pull_request:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
 
     steps:
     - name: Check out the repository
@@ -26,16 +28,16 @@ jobs:
       run: npm run build # Altere para o comando que usa para build
 
     - name: Package with Electron Builder
-      run: npx electron-builder --linux --win --mac  # Ajuste as opções conforme necessário
+      run: npx electron-builder --mac --win --linux  # Ajuste as opções conforme necessário
 
-    # Opção 1: Salvar como Artefato (disponível para download na aba de artefatos da execução)
+    # Opção 1: Salvar como Artefato
     - name: Upload Electron Installer as Artifact
       uses: actions/upload-artifact@v3
       with:
         name: electron-installer
         path: dist/ # Coloque o caminho correto da pasta onde o instalador é salvo
 
-    # Opção 2: Criar uma Release e anexar o Instalador (para download direto na página de releases)
+    # Opção 2: Criar uma Release e anexar o Instalador
     - name: Create GitHub Release
       id: create_release
       uses: actions/create-release@v1
@@ -51,6 +53,6 @@ jobs:
       uses: actions/upload-release-asset@v1
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/installer-name.exe  # Caminho do instalador específico
-        asset_name: installer-name.exe       # Nome do arquivo de instalador
+        asset_path: dist/installer-name.dmg  # Caminho do instalador específico (exemplo .dmg para macOS)
+        asset_name: installer-name.dmg       # Nome do arquivo de instalador
         asset_content_type: application/octet-stream
