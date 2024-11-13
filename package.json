@@ -1,16 +1,38 @@
 {
   "name": "electron",
   "version": "1.0.0",
-  "description": "",
+  "description": "Um aplicativo Electron simples",
   "main": "main.js",
+  "asar": false,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "rebuild": "electron-rebuild",
+    "start": "electron .",
+    "build": "rm -rf dist/ && electron-builder",
+    "mac": "electron-builder -m"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "dmg-license": "^1.0.11",
+    "electron": "^26.0.0",
+    "electron-builder": "^24.3.0",
+    "electron-rebuild": "^3.2.9"
+  },
+  "build": {
+    "appId": "com.meuprojeto.electron",
+    "files": [
+      "main.js",
+      "index.html",
+      "node_modules/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage",
+      "category": "Utility"
+    }
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1"
   }
 }

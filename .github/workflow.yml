@@ -47,7 +47,7 @@ jobs:
           CSC_LINK: ${{ secrets.CSC_LINK }}  # Secret com o link para o certificado de assinatura
           CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}  # Secret com a senha do certificado
         run: |
-          npm run build -m  # Comando para gerar o build (supondo que já esteja configurado no package.json)
+          npm run mac # Comando para gerar o build (supondo que já esteja configurado no package.json)
 
           # Aqui você vai adicionar a licença ao arquivo .dmg
           dmg-license --dmg dist/*.dmg --license-file LICENSE.txt  # Onde LICENSE.txt é o seu arquivo de licença
@@ -71,4 +71,4 @@ jobs:
         run: |
           git add dist/*.dmg  # Adiciona arquivos .dmg ao Git
           git commit -m "Adicionando build compactado"  # Cria um commit com o build
-          git push origin main  # Envia o commit para a branch main
+          git push origin master  # Envia o commit para a branch main
