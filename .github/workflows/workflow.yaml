@@ -57,16 +57,16 @@ jobs:
       # 7. Compactar a saída do build
       - name: Compress the build output
         run: |
-          tar -czf electron.tar.gz -C dist/  # Compacta a pasta dist em um arquivo .tar.gz
+          #tar -czf electron.tar.gz -C dist/  # Compacta a pasta dist em um arquivo .tar.gz
           # Caso prefira zip:
           # zip -r electron.zip dist/
 
       # 8. Fazer upload do arquivo compactado como Artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v3
-        with:
-          name: mac-build  # Nome do artifact
-          path: electron.tar.gz  # Caminho do arquivo compactado
+        #with:
+          #name: mac-build  # Nome do artifact
+          #path: electron.tar.gz  # Caminho do arquivo compactado
 
       # 9. Commit e push (caso haja novos arquivos LFS)
       - name: Push to GitHub (if there are new LFS files)
