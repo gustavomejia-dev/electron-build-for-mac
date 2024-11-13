@@ -28,7 +28,7 @@ jobs:
       run: npm run build # Altere para o comando que usa para build
 
     - name: Package with Electron Builder
-      run: npx electron-builder --mac --win --linux  # Ajuste as opções conforme necessário
+      run: npm run mac  # Ajuste as opções conforme necessário
 
     # Opção 1: Salvar como Artefato
     - name: Upload Electron Installer as Artifact
