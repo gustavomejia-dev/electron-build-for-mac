@@ -25,33 +25,14 @@ jobs:
     - name: Build the Electron App
       run: npm run mac
 
-   
+    - name: Package with Electron Builder
+      run: |
+        export GH_TOKEN=${{ secrets.GITHUB_TOKEN }}
+        npx electron-builder --mac --win --linux  # Electron Builder usará GH_TOKEN para upload de releases
 
-    # Opção 1: Salvar como Artefato
+    # Opcional: Salvar como Artefato para download direto do GitHub Actions
     - name: Upload Electron Installer as Artifact
       uses: actions/upload-artifact@v3
       with:
         name: electron-installer
         path: dist/
-
-    # Opção 2: Criar uma Release e Anexar o Instalador
-    - name: Create GitHub Release
-      id: create_release
-      uses: actions/create-release@v1
-      with:
-        tag_name: 'v1.0.0'
-        release_name: 'Release v1.0.0'
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload Installer to Release
-      uses: actions/upload-release-asset@v1
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: dist/installer-name.dmg  # Ajuste conforme necessário
-        asset_name: installer-name.dmg
-        asset_content_type: application/octet-stream
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
