@@ -1,0 +1,64 @@
+name: Build Electron App for macOS
+
+on:
+  push:
+    branches:
+      - main  # Quando um push é feito na branch main
+  pull_request:
+    branches:
+      - main  # Quando uma pull request é aberta para a branch main
+
+jobs:
+  build:
+    runs-on: macos-latest  # O job será executado em um ambiente macOS
+
+    steps:
+      # 1. Checar o repositório
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # 2. Configurar Git LFS
+      - name: Set up Git LFS
+        run: |
+          git lfs install  # Inicializa o Git LFS
+          git lfs track "dist/*.dmg"  # Rastreia arquivos grandes (ex: arquivos .dmg)
+          git add .gitattributes  # Adiciona o arquivo .gitattributes com a configuração do LFS
+          git commit -m "Adicionando configuração do Git LFS" || echo "Nada para commit"
+
+      # 3. Configurar o Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Define a versão do Node.js a ser usada
+
+      # 4. Instalar dependências
+      - name: Install dependencies
+        run: npm install  # Instala as dependências do projeto
+
+      # 5. Compilar a aplicação Electron
+      - name: Build the Electron app
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}  # Secret com o link para o certificado de assinatura
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}  # Secret com a senha do certificado
+        run: npm run build -m  # Comando para gerar o build (supondo que já esteja configurado no package.json)
+
+      # 6. Compactar a saída do build
+      - name: Compress the build output
+        run: |
+          tar -czf electron.tar.gz -C dist/  # Compacta a pasta dist em um arquivo .tar.gz
+          # Caso prefira zip:
+          # zip -r electron.zip dist/
+
+      # 7. Fazer upload do arquivo compactado como Artifact
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: mac-build  # Nome do artifact
+          path: electron.tar.gz  # Caminho do arquivo compactado
+
+      # 8. Commit e push (caso haja novos arquivos LFS)
+      - name: Push to GitHub (if there are new LFS files)
+        run: |
+          git add dist/*.dmg  # Adiciona arquivos .dmg ao Git
+          git commit -m "Adicionando build compactado"  # Cria um commit com o build
+          git push origin main  # Envia o commit para a branch main
